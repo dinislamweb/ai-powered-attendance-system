@@ -1,11 +1,17 @@
-from rest_framework import status
+from rest_framework import status, viewsets
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.permissions import AllowAny
-from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework_simplejwt.tokens import RefreshToken
+from .models import User
 
-from .serializers import LoginSerializer
+from .models import Teacher, Student
+from .serializers import (
+    LoginSerializer,
+    TeacherSerializer,
+    StudentSerializer,
+    UserSerializer,
+)
 
 
 class LoginAPIView(APIView):
@@ -49,3 +55,19 @@ class CurrentUserAPIView(APIView):
             },
             status=status.HTTP_200_OK,
         )
+
+class TeacherViewSet(viewsets.ModelViewSet):
+    queryset = Teacher.objects.all()
+    serializer_class = TeacherSerializer
+    permission_classes = [IsAuthenticated]
+
+
+class StudentViewSet(viewsets.ModelViewSet):
+    queryset = Student.objects.all()
+    serializer_class = StudentSerializer
+    permission_classes = [IsAuthenticated]
+    
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [AllowAny]

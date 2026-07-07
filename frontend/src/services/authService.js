@@ -61,7 +61,7 @@ export const clearAuthSession = () => {
 
 export const login = async (credentials) => {
   try {
-    const response = await api.post("/auth/login/", credentials);
+    const response = await api.post("/accounts/login/", credentials);
     const authData = setAuthSession(response.data);
 
     return {
