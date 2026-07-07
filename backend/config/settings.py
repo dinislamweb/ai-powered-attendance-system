@@ -95,6 +95,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'accounts',
     'courses',
+    'batches',
 ]
 
 MIDDLEWARE = [
