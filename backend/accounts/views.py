@@ -1,17 +1,23 @@
+from django.contrib.auth import login
 from rest_framework import status, viewsets
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 from .models import User
+from permissions.permissions import IsAdmin
 
-from .models import Teacher, Student
+from .models import User, Teacher, Student
 from .serializers import (
     LoginSerializer,
     TeacherSerializer,
     StudentSerializer,
     UserSerializer,
 )
+
+
+
+from .serializers import LoginSerializer
 
 
 class LoginAPIView(APIView):
@@ -23,6 +29,10 @@ class LoginAPIView(APIView):
 
         user = serializer.validated_data["user"]
 
+        # Create Django Session
+        login(request, user)
+
+        # Create JWT Token
         refresh = RefreshToken.for_user(user)
 
         return Response(
@@ -70,4 +80,7 @@ class StudentViewSet(viewsets.ModelViewSet):
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [
+        IsAuthenticated,
+        IsAdmin,
+    ]

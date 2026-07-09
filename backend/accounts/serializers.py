@@ -17,13 +17,19 @@ class LoginSerializer(serializers.Serializer):
         try:
             user = User.objects.get(email=email)
         except User.DoesNotExist:
-            raise serializers.ValidationError("Invalid email or password.")
+            raise serializers.ValidationError(
+                "Invalid email or password."
+            )
 
         if not user.check_password(password):
-            raise serializers.ValidationError("Invalid email or password.")
+            raise serializers.ValidationError(
+                "Invalid email or password."
+            )
 
         if not user.is_active:
-            raise serializers.ValidationError("User account is inactive.")
+            raise serializers.ValidationError(
+                "User account is inactive."
+            )
 
         attrs["user"] = user
         return attrs
@@ -50,13 +56,31 @@ class TeacherSerializer(serializers.ModelSerializer):
             "status",
         ]
 
+    def validate_employee_id(self, value):
+        value = value.strip().upper()
+
+        queryset = Teacher.objects.filter(
+            employee_id=value
+        )
+
+        if self.instance:
+            queryset = queryset.exclude(
+                pk=self.instance.pk
+            )
+
+        if queryset.exists():
+            raise serializers.ValidationError(
+                "Employee ID already exists."
+            )
+
+        return value
+
     def create(self, validated_data):
         first_name = validated_data.pop("first_name")
         last_name = validated_data.pop("last_name")
         email = validated_data.pop("email")
         password = validated_data.pop("password")
 
-        # Create User
         user = User.objects.create_user(
             username=email,
             email=email,
@@ -66,12 +90,11 @@ class TeacherSerializer(serializers.ModelSerializer):
             role="teacher",
         )
 
-        # Create Teacher Profile
         teacher = Teacher.objects.create(
             user=user,
             **validated_data
         )
-    
+
         return teacher
 
 
@@ -97,13 +120,31 @@ class StudentSerializer(serializers.ModelSerializer):
             "status",
         ]
 
+    def validate_student_id(self, value):
+        value = value.strip().upper()
+
+        queryset = Student.objects.filter(
+            student_id=value
+        )
+
+        if self.instance:
+            queryset = queryset.exclude(
+                pk=self.instance.pk
+            )
+
+        if queryset.exists():
+            raise serializers.ValidationError(
+                "Student ID already exists."
+            )
+
+        return value
+
     def create(self, validated_data):
         first_name = validated_data.pop("first_name")
         last_name = validated_data.pop("last_name")
         email = validated_data.pop("email")
         password = validated_data.pop("password")
 
-        # Create User
         user = User.objects.create_user(
             username=email,
             email=email,
@@ -113,14 +154,14 @@ class StudentSerializer(serializers.ModelSerializer):
             role="student",
         )
 
-        # Create Student Profile
         student = Student.objects.create(
             user=user,
             **validated_data
         )
 
         return student
-        
+
+
 class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
 
@@ -140,7 +181,7 @@ class UserSerializer(serializers.ModelSerializer):
         password = validated_data.pop("password")
 
         user = User(
-            username=validated_data["email"],   # Internal username
+            username=validated_data["email"],
             email=validated_data["email"],
             first_name=validated_data.get("first_name", ""),
             last_name=validated_data.get("last_name", ""),

@@ -34,3 +34,37 @@ class ScheduleSerializer(serializers.ModelSerializer):
             "room",
             "status",
         ]
+
+    def validate(self, attrs):
+        start = attrs["start_time"]
+        end = attrs["end_time"]
+
+        # End time must be greater than start time
+        if start >= end:
+            raise serializers.ValidationError(
+                {
+                    "end_time": "End time must be after start time."
+                }
+            )
+
+        teacher = attrs["teacher"]
+        day = attrs["day"]
+
+        queryset = Schedule.objects.filter(
+            teacher=teacher,
+            day=day,
+            start_time=start,
+        )
+
+        # Exclude current object while updating
+        if self.instance:
+            queryset = queryset.exclude(pk=self.instance.pk)
+
+        if queryset.exists():
+            raise serializers.ValidationError(
+                {
+                    "schedule": "This schedule already exists."
+                }
+            )
+
+        return attrs

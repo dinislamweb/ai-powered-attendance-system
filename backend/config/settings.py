@@ -98,6 +98,7 @@ INSTALLED_APPS = [
     'batches',
     'schedules',
     'attendance',
+    'dashboard',
 ]
 
 MIDDLEWARE = [
